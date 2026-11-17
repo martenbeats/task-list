@@ -8,13 +8,13 @@ export class Task {
     @PrimaryGeneratedColumn()
     id: number;
     @Column()
-    title: string
+    title: string;
     @Column()
-    description: string
+    description: string;
     @Column({ default: StatusType.pending })
-    status: StatusType
-   @Column({ default: () => "NOW()" })
-    deadline: Date
+    status: StatusType;
+    @Column({ default: () => "NOW()" })
+    deadline: Date;
     @ManyToOne(() => User, { eager: false })
     @JoinColumn({ name: 'userId' })
     user: Relation<User>;

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CreateTaskDto } from './dto/create-task.dto.js';
 import { UpdateTaskDto } from './dto/update-task.dto.js';
 import { Task } from './entities/task.entity.js';
@@ -7,26 +7,48 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class TaskService {
+  logger = new Logger(TaskService.name);
 
-    constructor(@InjectRepository(Task) private readonly repo: Repository<Task>,){}
+  constructor(@InjectRepository(Task) private readonly repo: Repository<Task>,) { }
 
-  create(createTaskDto: CreateTaskDto) {
-    return 'This action adds a new task';
+  async create(createTaskDto: CreateTaskDto) {
+    const createdTask = await this.repo.save(createTaskDto);
+    return { message: 'Tarea creada', createdTask: createdTask };
   }
 
-  findAll() {
-    return `This action returns all task`;
+  async findAll() {
+    const tasks = await this.repo.find();
+    return { tasks: tasks }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} task`;
+ async findOne(id: number) {
+     const task = await this.repo.findOne({ where: { id: id } });
+    
+        if (!task) {
+          throw new NotFoundException(`La tarea no existe`);
+        }
+        return { task: task };
   }
 
-  update(id: number, updateTaskDto: UpdateTaskDto) {
-    return `This action updates a #${id} task`;
+ async update(id: number, updateTaskDto: UpdateTaskDto) {
+    try {
+      await this.repo.update(id, updateTaskDto);
+      const task = await this.repo.findOneBy({ id: id });
+      return { task: task };
+    } catch (error: any) {
+      this.logger.error(error);
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} task`;
+  async remove(id: number) {
+    try {
+      const result = await this.repo.delete({ id: id });
+
+      if (result.affected === 0) return false;
+      return true;
+    } catch (error: any) {
+      this.logger.error(error);
+      return false;
+    }
   }
 }

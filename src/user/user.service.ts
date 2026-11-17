@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto.js';
 import { UpdateUserDto } from './dto/update-user.dto.js';
 import { User } from './entities/user.entity.js';
@@ -14,8 +14,14 @@ export class UserService {
   constructor(@InjectRepository(User) private readonly repo: Repository<User>,) { }
 
   async create(createUserDto: CreateUserDto) {
-    const createdUser = await this.repo.save(createUserDto);
-    return { message: 'Usuario creado', createdUser: createdUser };
+    try {
+      const createdUser = await this.repo.save(createUserDto);
+      return { message: 'Usuario creado', createdUser: createdUser };
+    } catch (error: any) {
+      if (error.code == '23505')
+        throw new BadRequestException('Ya existe un usuario con ese nombre');
+      else throw new BadRequestException(error.detail);
+    }
   }
 
   async findAll() {
@@ -39,7 +45,9 @@ export class UserService {
       const user = await this.repo.findOneBy({ id: id });
       return { user: user };
     } catch (error: any) {
-      this.logger.error(error);
+      if (error.code == '23505')
+        throw new BadRequestException('Ya existe un usuario con ese nombre');
+      else throw new BadRequestException(error.detail);
     }
   }
 

@@ -1,5 +1,5 @@
 export enum StatusType {
     pending = 'Pendiente',
-    inProcess = 'En Curso',
+    inProgress = 'En Curso',
     done = 'Hecha'
 }

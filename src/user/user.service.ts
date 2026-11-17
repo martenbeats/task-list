@@ -51,15 +51,15 @@ export class UserService {
     }
   }
 
-  async remove(id: number) {
+ async remove(id: number) {
     try {
       const result = await this.repo.delete({ id: id });
 
-      if (result.affected === 0) return false;
-      return true;
+      if (result.affected === 0)  throw new NotFoundException(`El usuario no existe`);
+       return { message: `Usuario eliminado` };
     } catch (error: any) {
       this.logger.error(error);
-      return false;
+       return { message: `Error al eliminar usuario: ${error.detail}` };
     }
   }
 }

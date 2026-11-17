@@ -30,6 +30,16 @@
 ```bash
 $ npm install
 ```
+## Database setup
+
+Create a .env file on project root folder and use the .env.template variable names to setup your database connection.
+
+Create the database and run migration script:
+
+```bash
+$ npm run migration:run
+```
+
 
 ## Compile and run the project
 
